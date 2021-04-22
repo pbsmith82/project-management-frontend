@@ -3,4 +3,5 @@ const projectsURL = baseURL + '/projects'
 const projectTypesURL = baseURL + '/project_types'
 const projects = document.getElementById("projects")
 
-ItemApi.getProjects()
+ProjectApi.getProjects()
+

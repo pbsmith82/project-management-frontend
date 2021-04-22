@@ -107,11 +107,12 @@ h3, .h3 {
 }
 
 h4, .h4 {
-  font-size: calc(1.275rem + 0.3vw);
+  font-size: smaller;
+    color: gray;
 }
 @media (min-width: 1200px) {
   h4, .h4 {
-    font-size: 1.5rem;
+    font-size: smaller;
   }
 }
 
@@ -5194,7 +5195,7 @@ textarea.form-control-lg {
   top: 0;
   left: 0;
   z-index: 1050;
-  display: none;
+  display: flexbox;
   width: 100%;
   height: 100%;
   overflow: hidden;
@@ -5206,6 +5207,7 @@ textarea.form-control-lg {
   width: auto;
   margin: 0.5rem;
   pointer-events: none;
+  display: block;
 }
 .modal.fade .modal-dialog {
   transition: transform 0.3s ease-out;
