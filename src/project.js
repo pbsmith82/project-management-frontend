@@ -17,7 +17,7 @@ class Project {
         this.element.className = "card"
         this.element.dataset.id = id 
 
-        this.element.addEventListener('click', this.modifyProject)
+        this.element.addEventListener('click', this.menuProject)
 
         Project.all.push(this)
     }
@@ -26,7 +26,14 @@ class Project {
         
         this.element.innerHTML = 
         `<div id="${this.id}">
-            <div id="title-${this.id}" class="card-header">${this.title}</div>
+            <div id="title-${this.id}" class="card-header">
+                <div class="row row-cols-2">
+                   <div> <h3> ${this.title} </h3> </div>
+                   <div align="right"> 
+                    <button class="btn btn-primary btn-sm" id="edit-${this.id}" >Edit</button>
+                    </div>
+                </div>
+            </div>
             <div class="card-body"> 
                 <h4>Status:</h4><div id="status-${this.id}">${this.status}</div><br>
                 <h4>Project Type:</h4><div id="project_type-${this.id}">${this.projectTypeName}</div> <br>
@@ -37,21 +44,22 @@ class Project {
             </div>
         </div>
         <div class="card-footer">
-        <button class="btn btn-primary btn-sm" id="edit-${this.id}" >Edit</button>
-        <button class="btn btn-primary btn-sm" id="delete-${this.id}">Delete</button>
-        </div>
+            <div class="row row-cols-2">
+                    <button class="btn btn-danger btn-sm" id="delete-${this.id}">Delete</button>
+                    <button class="btn btn-success btn-sm" id="delete-${this.id}">Add Story</button>   
+            </div>
         </div>`
 
         return this.element
     }
 
-    modifyProject = (event) => {
+    menuProject = (event) => {
         if (event.target.innerText === "Edit"){
             this.openEditModal(event.target)
 
             
         }else if(event.target.innerText === "Delete"){
-            this.element.remove() // remove it before the fetch request 
+            this.element.remove() 
             ProjectApi.deleteProject(this.id)
         }
     }
@@ -95,8 +103,7 @@ class Project {
 
     updateProject = (event) => {
         if (event.target.innerText === "Close"){
-            const modalParent = document.querySelector(`#project-${this.id}`)
-            modalParent.removeChild(document.querySelector(".modal"))
+         (document.querySelector(`#project-${this.id}`)).removeChild(document.querySelector(".modal"))
             
         }
         else if(event.target.innerText === "Save changes"){
@@ -162,12 +169,11 @@ class Project {
 
         }
         else if (event.target.innerText === "Close"){
-            this.hidden = true
-            
+            (document.querySelector(`#projects`)).removeChild(document.querySelector(".modal"))   
         }        
     }
 
-    static filterByType(event){
+    static typeOrder(event){
         let filteredType = event.target.value
         if (filteredType && !parseInt(filteredType) == 0){
             for (const project of Project.all){

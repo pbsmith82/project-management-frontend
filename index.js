@@ -17,4 +17,4 @@ function newProject(event) {
 
 }
 
-dropdown.addEventListener('change', Project.filterByType)
+dropdown.addEventListener('change', Project.typeOrder)
