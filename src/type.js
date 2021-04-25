@@ -10,29 +10,21 @@ class Type {
         Type.all.push(this)
     }
 
-    addToDropDown(){
+    addToDropDown(event){
         const option = document.createElement('option')
         option.value  = this.id 
         option.innerText = this.name
-        option.addEventListener('select', this.setActiveType)
-        dropdown.append(option)
-        dropdown.addEventListener('select', this.setActiveType)
+        if(event){
+            const dropdown2 = document.getElementById('types-selector')
+            if (dropdown2.attributes.value){
+                if (option.value === dropdown2.attributes.value.value){
+                    option.selected = true
+                }}
+                dropdown2.append(option)
+        }else {
+            dropdown.append(option)
+        }
         
-    }
-
-    addToDropDown2(){
-        
-        const dropdown2 = document.getElementById('types-selector')
-        const option = document.createElement('option')
-        option.value  = this.id 
-        //debugger
-        option.innerText = this.name
-        if (dropdown2.attributes.value){
-        if (option.value === dropdown2.attributes.value.value){
-            option.selected = true
-        }}
-        //debugger
-        dropdown2.append(option)
     }
 
 }

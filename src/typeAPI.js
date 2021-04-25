@@ -9,12 +9,7 @@ class TypeApi {
         .then( json => {
                 json["data"].forEach(element => {
                     const type = new Type({id: element.id, ...element.attributes})
-                    if(event){
-                        type.addToDropDown2()
-                    }else{
-                        type.addToDropDown() 
-                    }
-
+                        type.addToDropDown(event) 
                 })
         })
     }
