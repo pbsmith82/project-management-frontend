@@ -17,7 +17,6 @@ class Story {
 
 
     static newStoryModal(projectId, projectTitle) {
-
         const container = document.getElementById('projects')
         
         
@@ -109,23 +108,6 @@ class Story {
 
 
     static newStoryMenu = (event) => {
-        this.projectTitle = this.element.querySelector(".projectTitle").innerText
-        this.projectId = this.element.querySelector("#project_id").value
-
-        if (event.target.innerText === "Cancel"){         
-            (document.querySelector(`#projects`)).removeChild(document.querySelector(".modal"))
-            this.viewStoriesModal(this.projectId, this.projectTitle)
-
-        }else if (event.target.innerText === "Save New Story"){
-            this.savingNewStory(event)
-        
-        } 
-    }
-
-    
-    
-    
-    static savingNewStory = (event) => {
         let modalBody = document.querySelector(".modal-body")
             //debugger
             this.title = modalBody.querySelector(".title").value
@@ -133,9 +115,17 @@ class Story {
             this.projectId = parseInt(modalBody.querySelector("#project_id").value)
             this.acceptanceCriteria = modalBody.querySelector(".acceptance_criteria").value
             this.description = modalBody.querySelector(".description").value
+            this.projectTitle = this.element.querySelector(".projectTitle").innerText
+
+        if (event.target.innerText === "Cancel"){         
+            (document.querySelector(`#projects`)).removeChild(document.querySelector(".modal"))
+            this.viewStoriesModal(this.projectId, this.projectTitle)
+
+        }else if (event.target.innerText === "Save New Story"){
             StoryApi.create(this)
             event.currentTarget.remove()
-            
+        
+        } 
     }
 
 
@@ -205,7 +195,7 @@ class Story {
 
 
 
-    static editStoryModal(projectId, projectTitle) {
+    static editStoryModal (projectId, projectTitle) {
         const container = document.getElementById('projects')
         this.element =  Story.all.find(story => story.id === parseInt(event.path[1].id)) 
         const div = document.createElement("div")

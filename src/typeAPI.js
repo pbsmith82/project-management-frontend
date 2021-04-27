@@ -7,9 +7,9 @@ class TypeApi {
         fetch(this.baseURL)
         .then(r => r.json())
         .then( json => {
-                json["data"].forEach(element => {
-                    const type = new Type({id: element.id, ...element.attributes})
-                        type.addToDropDown(event) 
+                json["data"].forEach(type => {
+                    const t = new Type({id: type.id, ...type.attributes})
+                        t.addType(event) 
                 })
         })
     }

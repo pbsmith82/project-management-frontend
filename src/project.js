@@ -22,7 +22,7 @@ class Project {
         Project.all.push(this)
     }
 
-    renderProjects(){ 
+    supplyProjects(){ 
         
         this.element.innerHTML = 
         `<div id="${this.id}">
@@ -78,7 +78,7 @@ class Project {
 
     displayProjects(){
         
-        projects.appendChild(this.renderProjects())
+        projects.appendChild(this.supplyProjects())
     }
 
     openEditModal = () =>{        
@@ -165,7 +165,7 @@ class Project {
     }
 
     static recordNewProject(event) {
-
+        
         const modal = document.querySelector("#newProjectModal")
         
         if (event.target.innerText === "Create New Record"){
@@ -177,7 +177,7 @@ class Project {
             this.project_type_id = parseInt(this.querySelector(".project_type").value)
             this.project_manager = this.querySelector(".project_manager").value
             this.description = this.querySelector(".description").value
-            ProjectApi.create(this)
+            ProjectApi.createProject(this)
             modal.remove()
 
         }

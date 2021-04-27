@@ -9,7 +9,7 @@ class Type {
         Type.all.push(this)
     }
 
-    addToDropDown(event){
+    addType(event){
         const option = document.createElement('option')
         option.value  = this.id 
         option.innerText = this.name
