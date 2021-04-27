@@ -6,7 +6,7 @@ Project Management is a tool designed to help multiple projects, and the associa
 ## Installation
 Step One: Fork and Clone Repository.
 
-Step Two: You will need to install the backend (project-management-api). Once you have setup the backend, you will be able use Project Management. 
+Step Two: You will need to install the backend [project-management-api](https://github.com/pbsmith82/project-management-api). Once you have setup the backend, you will be able use Project Management. 
 
 Simply make sure your backend is available on the localserver and use the following command 
 
