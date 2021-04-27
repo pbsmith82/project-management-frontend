@@ -69,7 +69,7 @@ class ProjectApi {
                 const i = new Project({id: json.data.id, ...json.data.attributes} )
                 i.attachToDom()
             })
-        project.hidden = true
+        
         
     }
 

@@ -6,7 +6,6 @@ class Type {
         this.id = id
         this.name = name
         this.description = description
-        this.active = false
         Type.all.push(this)
     }
 

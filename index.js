@@ -12,6 +12,8 @@ ProjectApi.getProjects()
 
 TypeApi.getTypes()
 
+StoryApi.getStories()
+
 function newProject(event) {
     Project.newProjectModal(event)
 

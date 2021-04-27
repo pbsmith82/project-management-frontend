@@ -31,6 +31,7 @@ class Project {
                    <div> <h3> ${this.title} </h3> </div>
                    <div align="right"> 
                     <button class="btn btn-primary btn-sm" id="edit-${this.id}" >Edit</button>
+                    <button class="btn btn-danger btn-sm" id="delete-${this.id}">Delete</button>
                     </div>
                 </div>
             </div>
@@ -45,7 +46,7 @@ class Project {
         </div>
         <div class="card-footer">
             <div class="row row-cols-2">
-                    <button class="btn btn-danger btn-sm" id="delete-${this.id}">Delete</button>
+                    <button class="btn btn-secondary btn-sm" id="delete-${this.id}">View Stories</button>
                     <button class="btn btn-success btn-sm" id="delete-${this.id}">Add Story</button>   
             </div>
         </div>`
@@ -54,6 +55,7 @@ class Project {
     }
 
     menuProject = (event) => {
+        
         if (event.target.innerText === "Edit"){
             this.openEditModal(event.target)
 
@@ -61,6 +63,14 @@ class Project {
         }else if(event.target.innerText === "Delete"){
             this.element.remove() 
             ProjectApi.deleteProject(this.id)
+
+        }else if(event.target.innerText === "Add Story"){
+    
+            Story.newStoryModal(this.id, this.title) 
+
+        }else if(event.target.innerText === "View Stories"){
+    
+            Story.viewStoriesModal(this.id, this.title) 
         }
     }
 
@@ -125,6 +135,7 @@ class Project {
         
         this.element = document.createElement("div")
         this.element.className = "modal"
+        this.element.id = "newProjectModal"
         this.element.innerHTML = `
         <div class="modal" tabindex="-1" role="dialog">
             <div class="modal-dialog" role="document">
@@ -154,6 +165,8 @@ class Project {
     }
 
     static recordNewProject(event) {
+
+        const modal = document.querySelector("#newProjectModal")
         
         if (event.target.innerText === "Create New Record"){
             
@@ -164,12 +177,12 @@ class Project {
             this.project_type_id = parseInt(this.querySelector(".project_type").value)
             this.project_manager = this.querySelector(".project_manager").value
             this.description = this.querySelector(".description").value
-            
             ProjectApi.create(this)
+            modal.remove()
 
         }
         else if (event.target.innerText === "Close"){
-            (document.querySelector(`#projects`)).removeChild(document.querySelector(".modal"))   
+            modal.remove()
         }        
     }
 
