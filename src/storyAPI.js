@@ -54,6 +54,7 @@ class StoryApi {
         let {title, status, acceptanceCriteria, projectId, description} = story
         let acceptance_criteria = acceptanceCriteria
         let project_id = projectId
+        
         const storyDetails = {
             title,
             status,
@@ -73,11 +74,17 @@ class StoryApi {
         fetch(`${this.baseURL}`, configObj)
         .then(r => r.json())
         .then(json => {
-                const s = new Story({id: json.data.id, ...json.data.attributes} )
-
-                Story.viewStoriesModal(s.projectId, s.projectTitle)
+            if(json.data){
                 
-            })
+                const s = new Story({id: json.data.id, ...json.data.attributes} )
+                Story.viewStoriesModal(s.projectId, s.projectTitle)
+            }else{
+                const p = Project.all.find(project => parseInt(project.id) === projectId)
+                Story.viewStoriesModal(p.id, p.title)
+                alert(json.error)
+            }
+                
+        })
         
         
     }

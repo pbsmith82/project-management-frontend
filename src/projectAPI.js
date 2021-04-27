@@ -39,9 +39,14 @@ class ProjectApi {
         fetch(`${this.baseURL}`, configObj)
         .then(r => r.json())
         .then(json => {
+            if(json.data){
                 const project = new Project({id: json.data.id, ...json.data.attributes} )
                 project.displayProjects()
-            })
+            }else{
+                alert(json.error)
+            }
+
+        })
         
         
     }
