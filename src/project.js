@@ -76,7 +76,7 @@ class Project {
 
 
 
-    attachToDom(){
+    displayProjects(){
         
         projects.appendChild(this.renderProjects())
     }

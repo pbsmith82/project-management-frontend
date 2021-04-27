@@ -189,11 +189,11 @@ class Story {
 
 
     static editStoryMenu = (event) => {
-        const modal = event.target.offsetParent.parentElement
+        const modal = document.getElementById('edit-modal')
 
         if (event.target.innerText === "Cancel"){
-            modal.remove()
             this.viewStoriesModal(this.element.projectId, this.element.projectTitle)
+            modal.remove()
 
         }else if (event.target.innerText === "Save"){
             this.savingEditStory()

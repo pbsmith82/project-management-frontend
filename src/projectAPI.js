@@ -7,8 +7,8 @@ class ProjectApi {
         .then(data => {
 
             data["data"].forEach(project => {
-                const i = new Project({id: project.id, ...project.attributes} )
-                i.attachToDom()
+                const project = new Project({id: project.id, ...project.attributes} )
+                project.displayProjects()
             })
         })
     }
