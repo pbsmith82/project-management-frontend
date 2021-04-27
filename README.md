@@ -4,24 +4,15 @@ Project Management is a tool designed to help multiple projects, and the associa
 
 
 ## Installation
-Step One: Fork and Clone Repository. After checking out the repo run the following commands.
-
-```zsh
-bundle install
-```
-
-```zsh
-rake db:migrate
-```
-
-```zsh
-rake db:seed
-```
-
+Step One: Fork and Clone Repository.
 
 Step Two: You will need to install the backend (project-management-api). Once you have setup the backend, you will be able use Project Management. 
 
-Simply make sure your backend is available on the localserver and open Index.html
+Simply make sure your backend is available on the localserver and use the following command 
+
+```zsh
+open Index.html
+```
 
 ## Usage
 Users will be able to create projects, status them as a whole. As well as, create smaller stories for each project, and status them out as well.
