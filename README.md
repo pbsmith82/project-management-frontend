@@ -19,7 +19,8 @@ rake db:seed
 ```
 
 
-Step Two: You will need to install the backend (project-management-api). Once you have setup the backend, you will be able use Project Management. 
+Step Two: You will need to install the backend (project-management-api). Once you have setup the backend, you will be able use Project Management.
+[project-management-api](https://github.com/pbsmith82/project-management-api)
 
 Simply make sure your backend is available on the localserver and open Index.html
 
