@@ -1,35 +1,109 @@
 <!doctype html>
-<html>
+<html lang="en">
     <head>
-    <title> Project Management </title>
+    <title> Project Management - Modern Dashboard </title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://kit.fontawesome.com/86a7cf576f.js" crossorigin="anonymous"></script>
     
     <link href="css/bootstrap.css" rel="stylesheet">
     <link href="css/bootstrap-grid.css" rel="stylesheet">
+    <link href="css/modern-styles.css" rel="stylesheet">
     
-    <!-- ... -->
     <nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
-            <div class="navbar-brand"> <i class="fas fa-project-diagram"></i>  Project Management v1.0 </div>
+            <div class="navbar-brand"> 
+                <i class="fas fa-project-diagram"></i>  
+                <span>Project Management</span>
+                <span style="font-size: 0.8rem; opacity: 0.8; margin-left: 0.5rem;">v2.0</span>
+            </div>
         </div>
     </nav>
-    <!-- ... -->
     
     </head>
 
     <body>
-        
-        
-        <div class="container">
-            <div class="row row-cols-2"> <h1> Welcome to Project Management </h1> 
-                <div align="right"><button class="btn btn-success btn-lg" id="new_project" >+ New Project</button></div>
-                <div id="filter"> <select name="type_filter" id="type_filter"><option>Select To Filter</option>
-                </select><br><br> </div>
+        <!-- Hero Banner -->
+        <section class="hero-banner">
+            <div class="hero-content">
+                <div class="hero-logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-project-diagram"></i>
+                    </div>
+                    <div class="logo-text">
+                        <h1 class="logo-title">ProjectFlow</h1>
+                        <p class="logo-tagline">Streamline Your Projects, Amplify Your Success</p>
+                    </div>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat-item">
+                        <div class="stat-number" id="total-projects">0</div>
+                        <div class="stat-label">Active Projects</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="total-stories">0</div>
+                        <div class="stat-label">Total Stories</div>
+                    </div>
+                </div>
             </div>
-            <div id="projects" class="row row-cols-2"> 
+            <div class="hero-wave">
+                <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+                    <path d="M0,0 C150,100 350,0 600,50 C850,100 1050,0 1200,50 L1200,120 L0,120 Z" fill="currentColor"></path>
+                </svg>
+            </div>
+        </section>
 
+        <div class="container">
+            <!-- Navigation Tabs -->
+            <div class="view-tabs">
+                <button class="view-tab active" id="projects-tab" data-view="projects">
+                    <i class="fas fa-list"></i> Projects
+                </button>
+                <button class="view-tab" id="calendar-tab" data-view="calendar">
+                    <i class="fas fa-calendar"></i> Calendar
+                </button>
+            </div>
+
+            <!-- Projects View -->
+            <div id="projects-view" class="view-content active">
+                <div class="row" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 2rem;">
+                    <div style="flex: 1; min-width: 250px;">
+                        <h1>Welcome to Project Management</h1>
+                    </div>
+                    <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                        <div id="filter">
+                            <select name="type_filter" id="type_filter">
+                                <option value="">All Projects</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-success btn-lg" id="new_project">
+                            <i class="fas fa-plus"></i> New Project
+                        </button>
+                    </div>
+                </div>
+                <div id="projects"> 
+
+                </div>
+            </div>
+
+            <!-- Calendar View -->
+            <div id="calendar-view" class="view-content">
+                <div class="calendar-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap;">
+                    <h1>Project Calendar</h1>
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <button class="btn btn-secondary" id="prev-month">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <h2 id="calendar-month-year" style="margin: 0; min-width: 200px; text-align: center;"></h2>
+                        <button class="btn btn-secondary" id="next-month">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                        <button class="btn btn-primary" id="today-btn">
+                            <i class="fas fa-calendar-day"></i> Today
+                        </button>
+                    </div>
+                </div>
+                <div id="calendar-container"></div>
             </div>
         </div>
 
@@ -39,6 +113,7 @@
         <script src="src/projectAPI.js" type="text/javascript"></script>
         <script src="src/type.js" type="text/javascript"></script>
         <script src="src/typeAPI.js" type="text/javascript"></script>
+        <script src="src/calendar.js" type="text/javascript"></script>
         <script src="index.js" type="text/javascript"></script>
 
     </body>

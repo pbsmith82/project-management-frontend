@@ -5,11 +5,23 @@ class ProjectApi {
         fetch(this.baseURL)
         .then(resp => resp.json())
         .then(data => {
-
+            // Clear existing projects first
+            Project.all = []
+            
             data["data"].forEach(project => {
                 const p = new Project({id: project.id, ...project.attributes} )
                 p.displayProjects()
             })
+            
+            // Update calendar after projects are loaded
+            if (typeof updateCalendar === 'function') {
+                setTimeout(() => {
+                    updateCalendar()
+                }, 200)
+            }
+        })
+        .catch(error => {
+            console.error('Error loading projects:', error)
         })
     }
 
@@ -42,6 +54,14 @@ class ProjectApi {
             if(json.data){
                 const project = new Project({id: json.data.id, ...json.data.attributes} )
                 project.displayProjects()
+                // Update calendar
+                if (typeof updateCalendar === 'function') {
+                    updateCalendar()
+                }
+                // Update hero stats
+                if (typeof updateHeroStats === 'function') {
+                    updateHeroStats()
+                }
             }else{
                 alert(json.error)
             }
@@ -75,11 +95,23 @@ class ProjectApi {
         fetch(`${this.baseURL}/${project.id}`, configObj)
         .then(r => r.json())
         .then(json => {
+            project.title = json.data.attributes.title
+            project.status = json.data.attributes.status
             project.projectManager = json.data.attributes.project_manager
             project.projectTypeId = json.data.attributes.project_type_id
             project.projectTypeName = json.data.attributes.project_type_name
-            project.targetDate = json.data.attributes.target_date 
-           project.supplyProjects()
+            project.targetDate = json.data.attributes.target_date
+            project.description = json.data.attributes.description
+            // Remove old element and re-render with updated data
+            const oldElement = project.element
+            const parent = oldElement.parentNode
+            oldElement.remove()
+            project.supplyProjects()
+            parent.appendChild(project.element)
+            // Update calendar
+            if (typeof updateCalendar === 'function') {
+                updateCalendar()
+            }
         })
     }
 
@@ -97,6 +129,14 @@ class ProjectApi {
             .then(r => r.json())
             .then(json =>  { 
                 alert(json.message)
+                // Update calendar after deletion
+                if (typeof updateCalendar === 'function') {
+                    updateCalendar()
+                }
+                // Update hero stats
+                if (typeof updateHeroStats === 'function') {
+                    updateHeroStats()
+                }
             })
     }
 }

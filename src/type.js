@@ -9,21 +9,26 @@ class Type {
         Type.all.push(this)
     }
 
-    addType(event){
+    addType(container, selectorId, selectedValue){
         const option = document.createElement('option')
         option.value  = this.id 
         option.innerText = this.name
-        if(event){
-            const dropdown2 = document.getElementById('types-selector')
-            if (dropdown2.attributes.value){
-                if (option.value === dropdown2.attributes.value.value){
-                    option.selected = true
-                }}
-                dropdown2.append(option)
-        }else {
-            dropdown.append(option)
-        }
         
+        if(container && selectorId){
+            const dropdown = container.querySelector(`#${selectorId}`) || document.getElementById(selectorId)
+            if (dropdown) {
+                if (selectedValue && parseInt(selectedValue) === this.id) {
+                    option.selected = true
+                }
+                dropdown.append(option)
+            }
+        } else {
+            // Fallback to original behavior for filter dropdown
+            const dropdown = document.getElementById('type_filter')
+            if (dropdown) {
+                dropdown.append(option)
+            }
+        }
     }
 
 }
