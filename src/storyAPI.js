@@ -5,8 +5,21 @@ class StoryApi {
     }
 
     static getStories(){
-        fetch(this.baseURL)
-        .then(resp => resp.json())
+        console.log('Fetching stories from:', this.baseURL);
+        return fetch(this.baseURL)
+        .then(resp => {
+            if (!resp.ok) {
+                throw new Error(`HTTP error! status: ${resp.status}`);
+            }
+            const contentType = resp.headers.get("content-type");
+            if (!contentType || !contentType.includes("application/json")) {
+                return resp.text().then(text => {
+                    console.error('Expected JSON but got:', text.substring(0, 200));
+                    throw new Error('Server returned non-JSON response. Check API URL.');
+                });
+            }
+            return resp.json();
+        })
         .then(data => {
 
             data["data"].forEach(story => {

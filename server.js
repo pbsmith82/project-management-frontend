@@ -19,8 +19,9 @@ app.get('/', (req, res) => {
   const indexPath = path.join(__dirname, 'index.html');
   let html = fs.readFileSync(indexPath, 'utf8');
   
-  // Replace API_BASE_URL placeholder with environment variable or default
-  const apiBaseUrl = process.env.API_BASE_URL || '';
+  // Replace API_BASE_URL placeholder with environment variable or default Heroku backend URL
+  // If API_BASE_URL env var is set, use it; otherwise use the default Heroku backend
+  const apiBaseUrl = process.env.API_BASE_URL || 'https://project-manager-backend-app-61e30c0e5428.herokuapp.com';
   html = html.replace(
     /window\.API_BASE_URL = window\.API_BASE_URL \|\| '';/,
     `window.API_BASE_URL = '${apiBaseUrl}';`

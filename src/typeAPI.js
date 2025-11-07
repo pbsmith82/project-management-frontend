@@ -6,8 +6,21 @@ class TypeApi {
         
 
     static getTypes(container, selectorId, selectedValue){
-        fetch(this.baseURL)
-        .then(r => r.json())
+        console.log('Fetching types from:', this.baseURL);
+        return fetch(this.baseURL)
+        .then(r => {
+            if (!r.ok) {
+                throw new Error(`HTTP error! status: ${r.status}`);
+            }
+            const contentType = r.headers.get("content-type");
+            if (!contentType || !contentType.includes("application/json")) {
+                return r.text().then(text => {
+                    console.error('Expected JSON but got:', text.substring(0, 200));
+                    throw new Error('Server returned non-JSON response. Check API URL.');
+                });
+            }
+            return r.json();
+        })
         .then( json => {
                 json["data"].forEach(type => {
                     const t = new Type({id: type.id, ...type.attributes})

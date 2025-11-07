@@ -5,8 +5,21 @@ class ProjectApi {
     }
 
     static getProjects(){
-        fetch(this.baseURL)
-        .then(resp => resp.json())
+        console.log('Fetching projects from:', this.baseURL);
+        return fetch(this.baseURL)
+        .then(resp => {
+            if (!resp.ok) {
+                throw new Error(`HTTP error! status: ${resp.status}`);
+            }
+            const contentType = resp.headers.get("content-type");
+            if (!contentType || !contentType.includes("application/json")) {
+                return resp.text().then(text => {
+                    console.error('Expected JSON but got:', text.substring(0, 200));
+                    throw new Error('Server returned non-JSON response. Check API URL.');
+                });
+            }
+            return resp.json();
+        })
         .then(data => {
             // Clear existing projects first
             Project.all = []
@@ -24,7 +37,9 @@ class ProjectApi {
             }
         })
         .catch(error => {
-            console.error('Error loading projects:', error)
+            console.error('Error loading projects:', error);
+            console.error('Attempted URL:', this.baseURL);
+            alert(`Failed to load projects. Please check that the backend API is running.\n\nError: ${error.message}\n\nURL: ${this.baseURL}`);
         })
     }
 
