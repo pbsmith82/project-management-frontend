@@ -1,47 +1,108 @@
-const dropdown = document.getElementById('type_filter')
-const newProjectBttn = document.querySelector("#new_project")
-newProjectBttn.addEventListener('click', newProject)
+// Landing page navigation
+const enterAppBtn = document.getElementById('enter-app-btn')
+const heroEnterBtn = document.getElementById('hero-enter-btn')
+const landingPage = document.getElementById('landing-page')
+const mainApp = document.getElementById('main-app')
 
-// View switching
-const projectsTab = document.getElementById('projects-tab')
-const calendarTab = document.getElementById('calendar-tab')
-const projectsView = document.getElementById('projects-view')
-const calendarView = document.getElementById('calendar-view')
-
-if (projectsTab) {
-    projectsTab.addEventListener('click', () => switchView('projects'))
+function enterApp() {
+    // Hide landing page with animation
+    landingPage.classList.add('hidden')
+    
+    // Show main app after animation
+    setTimeout(() => {
+        landingPage.style.display = 'none'
+        mainApp.style.display = 'block'
+        // Initialize app
+        initializeApp()
+    }, 800)
 }
-if (calendarTab) {
-    calendarTab.addEventListener('click', () => switchView('calendar'))
+
+if (enterAppBtn) {
+    enterAppBtn.addEventListener('click', enterApp)
 }
 
-function switchView(view) {
-    if (view === 'projects') {
-        projectsView.classList.add('active')
-        calendarView.classList.remove('active')
-        projectsTab.classList.add('active')
-        calendarTab.classList.remove('active')
-    } else if (view === 'calendar') {
-        calendarView.classList.add('active')
-        projectsView.classList.remove('active')
-        calendarTab.classList.add('active')
-        projectsTab.classList.remove('active')
-        Calendar.renderCalendar()
+if (heroEnterBtn) {
+    heroEnterBtn.addEventListener('click', enterApp)
+}
+
+// Check if user has visited before (using sessionStorage)
+if (sessionStorage.getItem('hasVisited') === 'true') {
+    // Skip landing page if user has visited in this session
+    if (landingPage) landingPage.style.display = 'none'
+    if (mainApp) mainApp.style.display = 'block'
+    initializeApp()
+} else {
+    // Show landing page for first visit
+    if (landingPage) landingPage.style.display = 'block'
+    if (mainApp) mainApp.style.display = 'none'
+}
+
+function initializeApp() {
+    // Mark as visited
+    sessionStorage.setItem('hasVisited', 'true')
+    
+    // Initialize all app functionality
+    const dropdown = document.getElementById('type_filter')
+    const newProjectBttn = document.querySelector("#new_project")
+    if (newProjectBttn) {
+        newProjectBttn.addEventListener('click', newProject)
     }
+
+    // View switching
+    const projectsTab = document.getElementById('projects-tab')
+    const calendarTab = document.getElementById('calendar-tab')
+    const projectsView = document.getElementById('projects-view')
+    const calendarView = document.getElementById('calendar-view')
+
+    if (projectsTab) {
+        projectsTab.addEventListener('click', () => switchView('projects'))
+    }
+    if (calendarTab) {
+        calendarTab.addEventListener('click', () => switchView('calendar'))
+    }
+
+    function switchView(view) {
+        if (view === 'projects') {
+            projectsView.classList.add('active')
+            calendarView.classList.remove('active')
+            projectsTab.classList.add('active')
+            calendarTab.classList.remove('active')
+        } else if (view === 'calendar') {
+            calendarView.classList.add('active')
+            projectsView.classList.remove('active')
+            calendarTab.classList.add('active')
+            projectsTab.classList.remove('active')
+            Calendar.renderCalendar()
+        }
+    }
+
+    // Only initialize if elements exist
+    if (dropdown) {
+        dropdown.addEventListener('change', Project.typeOrder)
+    }
+
+    // Load data
+    ProjectApi.getProjects()
+    TypeApi.getTypes()
+    StoryApi.getStories()
+
+    // Initialize calendar
+    Calendar.init()
+    
+    // Update calendar after a short delay to allow projects to load
+    setTimeout(() => {
+        updateCalendar()
+    }, 500)
+    
+    // Initial stats update
+    setTimeout(() => {
+        updateHeroStats()
+    }, 1000)
 }
-
-ProjectApi.getProjects()
-TypeApi.getTypes()
-StoryApi.getStories()
-
-// Initialize calendar
-Calendar.init()
 
 function newProject(event) {
     Project.newProjectModal(event)
 }
-
-dropdown.addEventListener('change', Project.typeOrder)
 
 // Function to update calendar with current projects
 function updateCalendar() {
@@ -58,11 +119,6 @@ function updateCalendar() {
     }))
     Calendar.updateProjects(projectsData)
 }
-
-// Update calendar after a short delay to allow projects to load
-setTimeout(() => {
-    updateCalendar()
-}, 500)
 
 // Update hero banner stats
 function updateHeroStats() {
@@ -109,8 +165,3 @@ StoryApi.getStories = function() {
     }, 300)
     return result
 }
-
-// Initial stats update
-setTimeout(() => {
-    updateHeroStats()
-}, 1000)
