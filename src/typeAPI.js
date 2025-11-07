@@ -1,6 +1,8 @@
 class TypeApi {
-
-    static baseURL = 'http://localhost:3000/project_types'
+    static get baseURL() {
+        const base = window.API_BASE_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000' : '');
+        return base ? `${base}/project_types` : '/project_types';
+    }
         
 
     static getTypes(container, selectorId, selectedValue){

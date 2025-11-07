@@ -1,5 +1,8 @@
 class ProjectApi {
-    static baseURL = 'http://localhost:3000/projects'
+    static get baseURL() {
+        const base = window.API_BASE_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000' : '');
+        return base ? `${base}/projects` : '/projects';
+    }
 
     static getProjects(){
         fetch(this.baseURL)

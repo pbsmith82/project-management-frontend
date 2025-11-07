@@ -1,5 +1,8 @@
 class StoryApi {
-    static baseURL = 'http://localhost:3000/stories'
+    static get baseURL() {
+        const base = window.API_BASE_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3000' : '');
+        return base ? `${base}/stories` : '/stories';
+    }
 
     static getStories(){
         fetch(this.baseURL)
