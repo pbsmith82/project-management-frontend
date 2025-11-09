@@ -345,16 +345,22 @@ class Kanban {
             columnBody.appendChild(this.draggedElement);
             this.updateColumnCounts();
             
+            // Store reference to the card element before async operation
+            const cardElement = this.draggedElement;
+            
             // Save to API
             ProjectApi.patch(project).then(() => {
-                // Update the card's data-status attribute
-                this.draggedElement.dataset.status = newStatus;
-                // Update the status badge in the card
-                const statusBadge = this.draggedElement.querySelector('.status-badge');
-                if (statusBadge) {
-                    const newStatusClass = project.getStatusBadgeClass ? project.getStatusBadgeClass(newStatus) : 'status-badge';
-                    statusBadge.className = newStatusClass;
-                    statusBadge.textContent = newStatus;
+                // Check if card element still exists in DOM
+                if (cardElement && cardElement.parentNode) {
+                    // Update the card's data-status attribute
+                    cardElement.dataset.status = newStatus;
+                    // Update the status badge in the card
+                    const statusBadge = cardElement.querySelector('.status-badge');
+                    if (statusBadge) {
+                        const newStatusClass = project.getStatusBadgeClass ? project.getStatusBadgeClass(newStatus) : 'status-badge';
+                        statusBadge.className = newStatusClass;
+                        statusBadge.textContent = newStatus;
+                    }
                 }
                 // Show success feedback
                 this.showSaveFeedback(project.title, newStatus);
