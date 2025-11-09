@@ -16,49 +16,68 @@ class Kanban {
 
     static renderKanban() {
         const kanbanView = document.getElementById('kanban-view');
-        if (!kanbanView) return;
+        if (!kanbanView) {
+            console.error('Kanban view element not found');
+            return;
+        }
 
-        kanbanView.innerHTML = `
-            <div class="kanban-container">
-                ${this.columns.map(column => `
-                    <div class="kanban-column" data-column-id="${column.id}">
-                        <div class="kanban-column-header">
-                            <h3>${column.title}</h3>
-                            <span class="kanban-count" id="count-${column.id}">0</span>
+        try {
+            kanbanView.innerHTML = `
+                <div class="kanban-container">
+                    ${this.columns.map(column => `
+                        <div class="kanban-column" data-column-id="${column.id}">
+                            <div class="kanban-column-header">
+                                <h3>${column.title}</h3>
+                                <span class="kanban-count" id="count-${column.id}">0</span>
+                            </div>
+                            <div class="kanban-column-body" data-status="${column.id}">
+                                <!-- Cards will be inserted here -->
+                            </div>
                         </div>
-                        <div class="kanban-column-body" data-status="${column.id}">
-                            <!-- Cards will be inserted here -->
-                        </div>
-                    </div>
-                `).join('')}
-            </div>
-        `;
+                    `).join('')}
+                </div>
+            `;
 
-        this.updateKanban();
+            this.updateKanban();
+        } catch (error) {
+            console.error('Error rendering Kanban:', error);
+        }
     }
 
     static updateKanban() {
-        // Clear all columns
-        this.columns.forEach(column => {
-            const columnBody = document.querySelector(`.kanban-column-body[data-status="${column.id}"]`);
-            if (columnBody) {
-                columnBody.innerHTML = '';
+        try {
+            // Check if Project class exists
+            if (typeof Project === 'undefined' || !Project.all) {
+                console.warn('Project class or Project.all not available');
+                return;
             }
-        });
 
-        // Distribute projects to columns based on status
-        Project.all.forEach(project => {
-            const column = this.getColumnForStatus(project.status);
-            if (column) {
-                this.addProjectToColumn(project, column.id);
-            } else {
-                // Default to pending if status doesn't match
-                this.addProjectToColumn(project, 'pending');
+            // Clear all columns
+            this.columns.forEach(column => {
+                const columnBody = document.querySelector(`.kanban-column-body[data-status="${column.id}"]`);
+                if (columnBody) {
+                    columnBody.innerHTML = '';
+                }
+            });
+
+            // Distribute projects to columns based on status
+            if (Array.isArray(Project.all)) {
+                Project.all.forEach(project => {
+                    const column = this.getColumnForStatus(project.status);
+                    if (column) {
+                        this.addProjectToColumn(project, column.id);
+                    } else {
+                        // Default to pending if status doesn't match
+                        this.addProjectToColumn(project, 'pending');
+                    }
+                });
             }
-        });
 
-        // Update counts
-        this.updateColumnCounts();
+            // Update counts
+            this.updateColumnCounts();
+        } catch (error) {
+            console.error('Error updating Kanban:', error);
+        }
     }
 
     static getColumnForStatus(status) {
