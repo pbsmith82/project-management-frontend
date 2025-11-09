@@ -233,6 +233,7 @@ class Kanban {
 
     static handleDrop(e) {
         e.preventDefault();
+        e.stopPropagation();
         const columnBody = e.currentTarget;
         columnBody.classList.remove('drag-over');
 
@@ -241,12 +242,22 @@ class Kanban {
         const projectId = parseInt(this.draggedElement.dataset.projectId);
         const project = Project.all.find(p => p.id === projectId);
         
-        if (!project) return;
+        if (!project) {
+            console.error('Project not found for ID:', projectId);
+            this.draggedElement = null;
+            this.draggedColumn = null;
+            return;
+        }
 
         const newColumnId = columnBody.dataset.status;
         const newColumn = this.columns.find(c => c.id === newColumnId);
         
-        if (!newColumn) return;
+        if (!newColumn) {
+            console.error('Column not found for ID:', newColumnId);
+            this.draggedElement = null;
+            this.draggedColumn = null;
+            return;
+        }
 
         // Determine new status based on column
         let newStatus = '';
@@ -260,31 +271,55 @@ class Kanban {
             newStatus = 'Completed';
         }
 
-        // Update project status
-        if (project.status !== newStatus) {
+        // Check if we're moving to a different column
+        const currentColumn = this.getColumnForStatus(project.status);
+        const isMovingColumn = !currentColumn || currentColumn.id !== newColumnId;
+
+        if (isMovingColumn && project.status !== newStatus) {
             const oldStatus = project.status;
             project.status = newStatus;
             
-            // Move card visually first for better UX
+            // Remove card from old column if it exists
+            if (this.draggedElement.parentNode) {
+                this.draggedElement.parentNode.removeChild(this.draggedElement);
+            }
+            
+            // Add card to new column
             columnBody.appendChild(this.draggedElement);
             this.updateColumnCounts();
             
             // Save to API
             ProjectApi.patch(project).then(() => {
+                // Update the card's data-status attribute
+                this.draggedElement.dataset.status = newStatus;
+                // Update the status badge in the card
+                const statusBadge = this.draggedElement.querySelector('.status-badge');
+                if (statusBadge) {
+                    const newStatusClass = project.getStatusBadgeClass ? project.getStatusBadgeClass(newStatus) : 'status-badge';
+                    statusBadge.className = newStatusClass;
+                    statusBadge.textContent = newStatus;
+                }
                 // Show success feedback
                 this.showSaveFeedback(project.title, newStatus);
+                // Don't call updateKanban() here - the card is already in the right place
+                // Only update if there's an error
             }).catch(error => {
                 console.error('Error updating project status:', error);
                 // Revert status on error
                 project.status = oldStatus;
-                // Revert Kanban view
+                // Revert Kanban view to original state
                 this.updateKanban();
                 alert('Failed to save project status. Please try again.');
             });
         } else {
-            // Just move the card visually if status is the same
-            columnBody.appendChild(this.draggedElement);
-            this.updateColumnCounts();
+            // Just move the card visually if status is the same or already in correct column
+            if (this.draggedElement.parentNode !== columnBody) {
+                if (this.draggedElement.parentNode) {
+                    this.draggedElement.parentNode.removeChild(this.draggedElement);
+                }
+                columnBody.appendChild(this.draggedElement);
+                this.updateColumnCounts();
+            }
         }
 
         this.draggedElement = null;

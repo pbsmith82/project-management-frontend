@@ -154,10 +154,8 @@ class ProjectApi {
             if (typeof updateCalendar === 'function') {
                 updateCalendar()
             }
-            // Update Kanban
-            if (typeof Kanban !== 'undefined' && Kanban.updateKanban) {
-                Kanban.updateKanban()
-            }
+            // Don't update Kanban here - let the drag handler manage it
+            // This prevents cards from jumping around after drag and drop
             return json;
         })
         .catch(error => {
