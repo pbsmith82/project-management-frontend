@@ -97,7 +97,8 @@ class Kanban {
         const card = document.createElement('div');
         card.className = 'kanban-card';
         card.draggable = true;
-        card.dataset.projectId = project.id;
+        // Ensure project ID is stored as string for dataset
+        card.dataset.projectId = String(project.id);
         card.dataset.status = project.status || '';
 
         const statusClass = project.getStatusBadgeClass ? project.getStatusBadgeClass(project.status) : 'status-badge';
@@ -141,10 +142,17 @@ class Kanban {
             </div>
         `;
 
-        // Add drag event listeners
-        card.addEventListener('dragstart', this.handleDragStart.bind(this));
-        card.addEventListener('dragend', this.handleDragEnd.bind(this));
-        card.addEventListener('click', this.handleCardClick.bind(this));
+        // Add drag event listeners - use capture phase to ensure we get the card
+        card.addEventListener('dragstart', (e) => {
+            e.stopPropagation();
+            this.handleDragStart(e);
+        }, true);
+        card.addEventListener('dragend', (e) => {
+            this.handleDragEnd(e);
+        });
+        card.addEventListener('click', (e) => {
+            this.handleCardClick(e);
+        });
 
         columnBody.appendChild(card);
     }
@@ -199,15 +207,32 @@ class Kanban {
     }
 
     static handleDragStart(e) {
-        this.draggedElement = e.target;
-        this.draggedColumn = e.target.closest('.kanban-column-body');
-        e.target.classList.add('dragging');
+        // Make sure we get the card element, not a child element
+        const card = e.target.closest('.kanban-card');
+        if (!card) {
+            console.error('Drag started on non-card element');
+            return;
+        }
+        
+        this.draggedElement = card;
+        this.draggedColumn = card.closest('.kanban-column-body');
+        card.classList.add('dragging');
         e.dataTransfer.effectAllowed = 'move';
-        e.dataTransfer.setData('text/html', e.target.outerHTML);
+        e.dataTransfer.setData('text/html', card.outerHTML);
+        
+        // Store the project ID in dataTransfer for backup
+        const projectId = card.dataset.projectId;
+        if (projectId) {
+            e.dataTransfer.setData('text/plain', projectId);
+        }
     }
 
     static handleDragEnd(e) {
-        e.target.classList.remove('dragging');
+        // Remove dragging class from the card, not just the target
+        const card = e.target.closest('.kanban-card') || e.target;
+        if (card && card.classList) {
+            card.classList.remove('dragging');
+        }
         document.querySelectorAll('.kanban-column-body').forEach(col => {
             col.classList.remove('drag-over');
         });
@@ -239,11 +264,43 @@ class Kanban {
 
         if (!this.draggedElement) return;
 
-        const projectId = parseInt(this.draggedElement.dataset.projectId);
-        const project = Project.all.find(p => p.id === projectId);
+        // Get project ID from dataset, handling both string and number
+        const projectIdStr = this.draggedElement.dataset.projectId;
+        if (!projectIdStr) {
+            console.error('No project ID found on dragged element');
+            this.draggedElement = null;
+            this.draggedColumn = null;
+            return;
+        }
+
+        const projectId = parseInt(projectIdStr);
+        if (isNaN(projectId)) {
+            console.error('Invalid project ID:', projectIdStr);
+            this.draggedElement = null;
+            this.draggedColumn = null;
+            return;
+        }
+
+        // Try to find project with flexible ID comparison
+        const project = Project.all.find(p => {
+            const pId = typeof p.id === 'string' ? parseInt(p.id) : p.id;
+            return pId === projectId;
+        });
         
         if (!project) {
             console.error('Project not found for ID:', projectId);
+            console.log('Available project IDs:', Project.all.map(p => p.id));
+            console.log('Dragged element:', this.draggedElement);
+            console.log('Dataset:', this.draggedElement.dataset);
+            // Still move the card visually, but don't save
+            if (this.draggedElement.parentNode !== columnBody) {
+                if (this.draggedElement.parentNode) {
+                    this.draggedElement.parentNode.removeChild(this.draggedElement);
+                }
+                columnBody.appendChild(this.draggedElement);
+                this.updateColumnCounts();
+            }
+            alert('Project not found. Card moved visually but not saved. Please refresh the page.');
             this.draggedElement = null;
             this.draggedColumn = null;
             return;
