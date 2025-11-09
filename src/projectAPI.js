@@ -35,6 +35,12 @@ class ProjectApi {
                     updateCalendar()
                 }, 200)
             }
+            // Update Kanban after projects are loaded
+            if (typeof Kanban !== 'undefined' && Kanban.updateKanban) {
+                setTimeout(() => {
+                    Kanban.updateKanban()
+                }, 200)
+            }
         })
         .catch(error => {
             console.error('Error loading projects:', error);
@@ -76,6 +82,10 @@ class ProjectApi {
                 if (typeof updateCalendar === 'function') {
                     updateCalendar()
                 }
+                // Update Kanban
+                if (typeof Kanban !== 'undefined' && Kanban.updateKanban) {
+                    Kanban.updateKanban()
+                }
                 // Update hero stats
                 if (typeof updateHeroStats === 'function') {
                     updateHeroStats()
@@ -110,8 +120,20 @@ class ProjectApi {
             body: JSON.stringify(projectInfo)
         }
   
-        fetch(`${this.baseURL}/${project.id}`, configObj)
-        .then(r => r.json())
+        return fetch(`${this.baseURL}/${project.id}`, configObj)
+        .then(r => {
+            if (!r.ok) {
+                throw new Error(`HTTP error! status: ${r.status}`);
+            }
+            const contentType = r.headers.get("content-type");
+            if (!contentType || !contentType.includes("application/json")) {
+                return r.text().then(text => {
+                    console.error('Expected JSON but got:', text.substring(0, 200));
+                    throw new Error('Server returned non-JSON response.');
+                });
+            }
+            return r.json();
+        })
         .then(json => {
             project.title = json.data.attributes.title
             project.status = json.data.attributes.status
@@ -123,13 +145,24 @@ class ProjectApi {
             // Remove old element and re-render with updated data
             const oldElement = project.element
             const parent = oldElement.parentNode
-            oldElement.remove()
-            project.supplyProjects()
-            parent.appendChild(project.element)
+            if (parent) {
+                oldElement.remove()
+                project.supplyProjects()
+                parent.appendChild(project.element)
+            }
             // Update calendar
             if (typeof updateCalendar === 'function') {
                 updateCalendar()
             }
+            // Update Kanban
+            if (typeof Kanban !== 'undefined' && Kanban.updateKanban) {
+                Kanban.updateKanban()
+            }
+            return json;
+        })
+        .catch(error => {
+            console.error('Error updating project:', error);
+            throw error;
         })
     }
 
@@ -150,6 +183,10 @@ class ProjectApi {
                 // Update calendar after deletion
                 if (typeof updateCalendar === 'function') {
                     updateCalendar()
+                }
+                // Update Kanban after deletion
+                if (typeof Kanban !== 'undefined' && Kanban.updateKanban) {
+                    Kanban.updateKanban()
                 }
                 // Update hero stats
                 if (typeof updateHeroStats === 'function') {

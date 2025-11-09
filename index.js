@@ -50,29 +50,47 @@ function initializeApp() {
 
     // View switching
     const projectsTab = document.getElementById('projects-tab')
+    const kanbanTab = document.getElementById('kanban-tab')
     const calendarTab = document.getElementById('calendar-tab')
     const projectsView = document.getElementById('projects-view')
+    const kanbanView = document.getElementById('kanban-view')
     const calendarView = document.getElementById('calendar-view')
 
     if (projectsTab) {
         projectsTab.addEventListener('click', () => switchView('projects'))
+    }
+    if (kanbanTab) {
+        kanbanTab.addEventListener('click', () => switchView('kanban'))
     }
     if (calendarTab) {
         calendarTab.addEventListener('click', () => switchView('calendar'))
     }
 
     function switchView(view) {
+        // Remove active class from all views and tabs
+        [projectsView, kanbanView, calendarView].forEach(v => {
+            if (v) v.classList.remove('active')
+        })
+        [projectsTab, kanbanTab, calendarTab].forEach(t => {
+            if (t) t.classList.remove('active')
+        })
+
         if (view === 'projects') {
-            projectsView.classList.add('active')
-            calendarView.classList.remove('active')
-            projectsTab.classList.add('active')
-            calendarTab.classList.remove('active')
+            if (projectsView) projectsView.classList.add('active')
+            if (projectsTab) projectsTab.classList.add('active')
+        } else if (view === 'kanban') {
+            if (kanbanView) kanbanView.classList.add('active')
+            if (kanbanTab) kanbanTab.classList.add('active')
+            // Initialize and render Kanban
+            if (typeof Kanban !== 'undefined') {
+                Kanban.init()
+            }
         } else if (view === 'calendar') {
-            calendarView.classList.add('active')
-            projectsView.classList.remove('active')
-            calendarTab.classList.add('active')
-            projectsTab.classList.remove('active')
-            Calendar.renderCalendar()
+            if (calendarView) calendarView.classList.add('active')
+            if (calendarTab) calendarTab.classList.add('active')
+            if (typeof Calendar !== 'undefined') {
+                Calendar.renderCalendar()
+            }
         }
     }
 

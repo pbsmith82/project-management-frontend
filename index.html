@@ -130,6 +130,9 @@
                 <button class="view-tab active" id="projects-tab" data-view="projects">
                     <i class="fas fa-list"></i> Projects
                 </button>
+                <button class="view-tab" id="kanban-tab" data-view="kanban">
+                    <i class="fas fa-columns"></i> Kanban
+                </button>
                 <button class="view-tab" id="calendar-tab" data-view="calendar">
                     <i class="fas fa-calendar"></i> Calendar
                 </button>
@@ -155,6 +158,11 @@
                 <div id="projects"> 
 
                 </div>
+            </div>
+
+            <!-- Kanban View -->
+            <div id="kanban-view" class="view-content">
+                <!-- Kanban will be rendered here by kanban.js -->
             </div>
 
             <!-- Calendar View -->
@@ -188,6 +196,7 @@
         <script src="src/type.js" type="text/javascript"></script>
         <script src="src/typeAPI.js" type="text/javascript"></script>
         <script src="src/calendar.js" type="text/javascript"></script>
+        <script src="src/kanban.js" type="text/javascript"></script>
         <script src="index.js" type="text/javascript"></script>
 
     </body>
