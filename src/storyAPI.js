@@ -5,9 +5,20 @@ class StoryApi {
     }
 
     static getStories(){
+        if (!Auth.isAuthenticated()) {
+            console.warn('User not authenticated, cannot fetch stories');
+            return Promise.reject(new Error('Authentication required'));
+        }
         console.log('Fetching stories from:', this.baseURL);
-        return fetch(this.baseURL)
+        return fetch(this.baseURL, {
+            headers: Auth.getAuthHeaders()
+        })
         .then(resp => {
+            if (resp.status === 401) {
+                // Unauthorized - redirect to landing page
+                Auth.logout();
+                throw new Error('Authentication required');
+            }
             if (!resp.ok) {
                 throw new Error(`HTTP error! status: ${resp.status}`);
             }
@@ -44,7 +55,7 @@ class StoryApi {
         const configObj = {
             method: 'PATCH',
             headers: {
-                "Content-Type": "application/json",
+                ...Auth.getAuthHeaders(),
                 Accept: "application/json"
             },
             body: JSON.stringify(storyDetails)
@@ -81,7 +92,7 @@ class StoryApi {
         const configObj = {
             method: 'POST',
             headers: {
-                "Content-Type": "application/json",
+                ...Auth.getAuthHeaders(),
                 Accept: "application/json"
             },
             body: JSON.stringify(storyDetails)
@@ -108,10 +119,7 @@ class StoryApi {
     static deleteStory(id){
         const configObj = {
             method: 'DELETE',
-            headers: {
-                "Content-Type": "application/json",
-                Accept: "application/json"
-            }
+            headers: Auth.getAuthHeaders()
         }
         
         fetch(`${this.baseURL}/${id}`, configObj)

@@ -5,9 +5,20 @@ class ProjectApi {
     }
 
     static getProjects(){
+        if (!Auth.isAuthenticated()) {
+            console.warn('User not authenticated, cannot fetch projects');
+            return Promise.reject(new Error('Authentication required'));
+        }
         console.log('Fetching projects from:', this.baseURL);
-        return fetch(this.baseURL)
+        return fetch(this.baseURL, {
+            headers: Auth.getAuthHeaders()
+        })
         .then(resp => {
+            if (resp.status === 401) {
+                // Unauthorized - redirect to landing page
+                Auth.logout();
+                throw new Error('Authentication required');
+            }
             if (!resp.ok) {
                 throw new Error(`HTTP error! status: ${resp.status}`);
             }
@@ -55,29 +66,58 @@ class ProjectApi {
     static createProject(project){
         let {title, status, target_date, start_date, project_type_id, project_manager, description} = project
         const projectInfo = {
-            title,
-            status,
-            target_date,
-            start_date,
-            project_type_id,
-            project_manager,
-            description
+            project: {
+                title,
+                status,
+                target_date,
+                start_date,
+                project_type_id,
+                project_manager,
+                description
+            }
         }
         const configObj = {
             method: 'POST',
             headers: {
-                "Content-Type": "application/json",
+                ...Auth.getAuthHeaders(),
+                'Content-Type': 'application/json',
                 Accept: "application/json"
             },
             body: JSON.stringify(projectInfo)
         }
   
-        fetch(`${this.baseURL}`, configObj)
-        .then(r => r.json())
-        .then(json => {
+        return fetch(`${this.baseURL}`, configObj)
+        .then(r => {
+            if (!r.ok) {
+                return r.json().then(errorData => {
+                    console.error('API Error:', errorData);
+                    throw new Error(errorData.error || `HTTP error! status: ${r.status}`);
+                }).catch(() => {
+                    throw new Error(`HTTP error! status: ${r.status}`);
+                });
+            }
+            return r.json();
+        })
+        .then(async json => {
             if(json.data){
                 const project = new Project({id: json.data.id, ...json.data.attributes} )
                 project.displayProjects()
+                
+                // Check for duplicates after creation
+                try {
+                    const duplicateResponse = await AIService.detectDuplicates(json.data.id)
+                    const duplicates = duplicateResponse.data || []
+                    if (duplicates && duplicates.length > 0) {
+                        const duplicateTitles = duplicates.map(d => d.attributes.title).join(', ')
+                        if (confirm(`Warning: Similar projects found: ${duplicateTitles}\n\nDo you want to view them?`)) {
+                            // Show similar projects modal
+                            setTimeout(() => project.showSimilarProjects(), 500)
+                        }
+                    }
+                } catch (e) {
+                    console.error('Error checking duplicates:', e)
+                }
+                
                 // Update calendar
                 if (typeof updateCalendar === 'function') {
                     updateCalendar()
@@ -90,31 +130,48 @@ class ProjectApi {
                 if (typeof updateHeroStats === 'function') {
                     updateHeroStats()
                 }
+                return json;
             }else{
-                alert(json.error)
+                const errorMsg = json.error || 'Failed to create project';
+                alert(errorMsg);
+                throw new Error(errorMsg);
             }
 
         })
-        
-        
+        .catch(error => {
+            console.error('Error creating project:', error);
+            throw error;
+        });
     }
 
 
 
     static patch(project) {
-        let {title, status, target_date, project_type_id, project_manager, description} = project
+        // Extract all project properties, handling both camelCase and snake_case
+        const title = project.title
+        const status = project.status
+        const target_date = project.targetDate || project.target_date
+        const start_date = project.startDate || project.start_date
+        const project_type_id = project.projectTypeId || project.project_type_id
+        const project_manager = project.projectManager || project.project_manager
+        const description = project.description
+        
         const projectInfo = {
-            title,
-            status,
-            target_date,
-            project_type_id,
-            project_manager,
-            description
+            project: {
+                title,
+                status,
+                target_date,
+                start_date,
+                project_type_id,
+                project_manager,
+                description
+            }
         }
         const configObj = {
             method: 'PATCH',
             headers: {
-                "Content-Type": "application/json",
+                ...Auth.getAuthHeaders(),
+                'Content-Type': 'application/json',
                 Accept: "application/json"
             },
             body: JSON.stringify(projectInfo)
@@ -123,7 +180,12 @@ class ProjectApi {
         return fetch(`${this.baseURL}/${project.id}`, configObj)
         .then(r => {
             if (!r.ok) {
-                throw new Error(`HTTP error! status: ${r.status}`);
+                return r.json().then(errorData => {
+                    console.error('API Error:', errorData);
+                    throw new Error(errorData.error || `HTTP error! status: ${r.status}`);
+                }).catch(() => {
+                    throw new Error(`HTTP error! status: ${r.status}`);
+                });
             }
             const contentType = r.headers.get("content-type");
             if (!contentType || !contentType.includes("application/json")) {
@@ -141,6 +203,7 @@ class ProjectApi {
             project.projectTypeId = json.data.attributes.project_type_id
             project.projectTypeName = json.data.attributes.project_type_name
             project.targetDate = json.data.attributes.target_date
+            project.startDate = json.data.attributes.start_date
             project.description = json.data.attributes.description
             // Remove old element and re-render with updated data
             const oldElement = project.element
@@ -168,10 +231,7 @@ class ProjectApi {
     static deleteProject(id){
         const configObj = {
             method: 'DELETE',
-            headers: {
-                "Content-Type": "application/json",
-                Accept: "application/json"
-            }
+            headers: Auth.getAuthHeaders()
         }
         
         fetch(`${this.baseURL}/${id}`, configObj)

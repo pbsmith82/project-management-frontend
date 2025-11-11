@@ -30,7 +30,7 @@
                         <p class="hero-subtitle">The Modern Way to Manage Your Projects</p>
                         <p class="hero-description">Streamline your workflow, track progress, and achieve your goals with our powerful project management platform.</p>
                         <button class="hero-cta-button" id="hero-enter-btn">
-                            <span>Get Started Free</span>
+                            <span>Get Started - Login or Register</span>
                             <i class="fas fa-arrow-right"></i>
                         </button>
                     </div>
@@ -74,7 +74,7 @@
 
                 <div class="landing-cta">
                     <button class="landing-enter-btn" id="enter-app-btn">
-                        <span>Get Started</span>
+                        <span>Get Started - Login or Register</span>
                         <i class="fas fa-arrow-right"></i>
                     </button>
                 </div>
@@ -89,7 +89,21 @@
                 <div class="navbar-brand"> 
                     <i class="fas fa-project-diagram"></i>  
                     <span>Project Management</span>
-                    <span style="font-size: 0.8rem; opacity: 0.8; margin-left: 0.5rem;">v2.0</span>
+                    <span style="font-size: 0.8rem; opacity: 0.8; margin-left: 0.5rem;">v3.0</span>
+                </div>
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                    <button class="btn btn-sm btn-light" id="search-btn">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                    <div id="user-menu" style="display: none;">
+                        <span id="user-name" style="color: white; margin-right: 1rem;"></span>
+                        <button class="btn btn-sm btn-outline-light" id="logout-btn">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </div>
+                    <button class="btn btn-sm btn-outline-light" id="login-btn" style="display: none;">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </button>
                 </div>
             </div>
         </nav>
@@ -135,6 +149,9 @@
                 </button>
                 <button class="view-tab" id="calendar-tab" data-view="calendar">
                     <i class="fas fa-calendar"></i> Calendar
+                </button>
+                <button class="view-tab" id="analytics-tab" data-view="analytics">
+                    <i class="fas fa-chart-bar"></i> Analytics
                 </button>
             </div>
 
@@ -184,11 +201,18 @@
                 </div>
                 <div id="calendar-container"></div>
             </div>
+            
+            <!-- Analytics View -->
+            <div id="analytics-view" class="view-content">
+                <!-- Analytics will be rendered here by analytics.js -->
+            </div>
         </div>
         </div>
         <!-- End Main Application -->
 
         <script src="src/config.js" type="text/javascript"></script>
+        <script src="src/auth.js" type="text/javascript"></script>
+        <script src="src/authAPI.js" type="text/javascript"></script>
         <script src="src/story.js" type="text/javascript"></script>
         <script src="src/storyAPI.js" type="text/javascript"></script>
         <script src="src/project.js" type="text/javascript"></script>
@@ -197,6 +221,12 @@
         <script src="src/typeAPI.js" type="text/javascript"></script>
         <script src="src/calendar.js" type="text/javascript"></script>
         <script src="src/kanban.js" type="text/javascript"></script>
+        <script src="src/search.js" type="text/javascript"></script>
+        <script src="src/analytics.js" type="text/javascript"></script>
+        <script src="src/comments.js" type="text/javascript"></script>
+        <script src="src/attachments.js" type="text/javascript"></script>
+        <script src="src/websocket.js" type="text/javascript"></script>
+        <script src="src/aiService.js" type="text/javascript"></script>
         <script src="index.js" type="text/javascript"></script>
 
     </body>

@@ -43,7 +43,15 @@ class Story {
                     <textarea name="description" class="description" rows="4" placeholder="Enter story description"></textarea>
                     
                     <label><i class="fas fa-check-circle"></i> Acceptance Criteria</label>
-                    <textarea name="acceptance_criteria" class="acceptance_criteria" rows="4" placeholder="Enter acceptance criteria"></textarea>
+                    <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+                        <textarea name="acceptance_criteria" class="acceptance_criteria" rows="4" placeholder="Enter acceptance criteria" style="flex: 1;"></textarea>
+                        <button type="button" class="btn btn-sm" id="ai-generate-criteria" title="Generate with AI" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%); border: none; color: white; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);">
+                            <i class="fas fa-brain" style="color: white;"></i>
+                        </button>
+                    </div>
+                    <div id="ai-criteria-loading" style="display: none; font-size: 0.9rem; padding: 0.5rem; background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%); border-radius: 8px; border-left: 3px solid #667eea; margin-top: 0.5rem;">
+                        <i class="fas fa-spinner fa-spin" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-right: 0.5rem;"></i> <span style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 600;">AI Generating acceptance criteria...</span>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" id="create_new_story">
@@ -56,6 +64,43 @@ class Story {
                 </div>
             </div>
             </div>`
+            // Add AI acceptance criteria generation
+            const aiBtn = this.element.querySelector('#ai-generate-criteria');
+            if (aiBtn) {
+                aiBtn.addEventListener('click', async () => {
+                    const titleInput = this.element.querySelector('.title');
+                    const descriptionInput = this.element.querySelector('.description');
+                    const criteriaInput = this.element.querySelector('.acceptance_criteria');
+                    const loadingDiv = this.element.querySelector('#ai-criteria-loading');
+                    
+                    if (!titleInput.value.trim()) {
+                        alert('Please enter a story title first');
+                        return;
+                    }
+                    
+                    loadingDiv.style.display = 'block';
+                    aiBtn.disabled = true;
+                    
+                    const result = await AIService.generateAcceptanceCriteria(
+                        titleInput.value,
+                        descriptionInput.value || ''
+                    );
+                    
+                    loadingDiv.style.display = 'none';
+                    aiBtn.disabled = false;
+                    
+                    if (result.acceptance_criteria) {
+                        criteriaInput.value = result.acceptance_criteria;
+                        criteriaInput.style.borderColor = '#10b981';
+                        setTimeout(() => {
+                            criteriaInput.style.borderColor = '';
+                        }, 2000);
+                    } else {
+                        alert(result.error || 'Failed to generate acceptance criteria. Make sure OPENAI_API_KEY is configured.');
+                    }
+                });
+            }
+            
             this.element.addEventListener('click', this.newStoryMenu)
         container.append(this.element)
     }
@@ -298,7 +343,12 @@ class Story {
                     <textarea name="description" class="description" rows="4">${this.element.description || ''}</textarea>
                     
                     <label><i class="fas fa-check-circle"></i> Acceptance Criteria</label>
-                    <textarea name="acceptance_criteria" class="acceptance_criteria" rows="4">${this.element.acceptanceCriteria || ''}</textarea>
+                    <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+                        <textarea name="acceptance_criteria" class="acceptance_criteria" rows="4" style="flex: 1;">${this.element.acceptanceCriteria || ''}</textarea>
+                        <button type="button" class="btn btn-sm" id="ai-enhance-criteria-${this.element.id}" title="Generate with AI" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%); border: none; color: white; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);">
+                            <i class="fas fa-brain" style="color: white;"></i>
+                        </button>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" id="create_new_story">
@@ -311,6 +361,42 @@ class Story {
                 </div>
             </div>
             </div>`
+            // Add AI enhancement for edit modal
+            const aiEnhanceBtn = div.querySelector(`#ai-enhance-criteria-${this.element.id}`);
+            if (aiEnhanceBtn) {
+                aiEnhanceBtn.addEventListener('click', async () => {
+                    const titleInput = div.querySelector('.title');
+                    const descriptionInput = div.querySelector('.description');
+                    const criteriaInput = div.querySelector('.acceptance_criteria');
+                    
+                    if (!titleInput.value.trim()) {
+                        alert('Please enter a story title first');
+                        return;
+                    }
+                    
+                    aiEnhanceBtn.disabled = true;
+                    aiEnhanceBtn.innerHTML = '<i class="fas fa-spinner fa-spin" style="color: white;"></i>';
+                    
+                    const result = await AIService.generateAcceptanceCriteria(
+                        titleInput.value,
+                        descriptionInput.value || ''
+                    );
+                    
+                    aiEnhanceBtn.disabled = false;
+                    aiEnhanceBtn.innerHTML = '<i class="fas fa-brain" style="color: white;"></i>';
+                    
+                    if (result.acceptance_criteria) {
+                        criteriaInput.value = result.acceptance_criteria;
+                        criteriaInput.style.borderColor = '#10b981';
+                        setTimeout(() => {
+                            criteriaInput.style.borderColor = '';
+                        }, 2000);
+                    } else {
+                        alert(result.error || 'Failed to generate acceptance criteria');
+                    }
+                });
+            }
+            
             div.addEventListener('click', this.editStoryMenu)
         container.append(div)
     }

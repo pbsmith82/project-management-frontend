@@ -57,6 +57,8 @@ class Kanban {
                 const columnBody = document.querySelector(`.kanban-column-body[data-status="${column.id}"]`);
                 if (columnBody) {
                     columnBody.innerHTML = '';
+                    // Clear listener flag so listeners can be re-attached
+                    columnBody.removeAttribute('data-listeners-attached');
                 }
             });
 
@@ -75,6 +77,9 @@ class Kanban {
 
             // Update counts
             this.updateColumnCounts();
+            
+            // Re-setup column listeners after cards are added
+            this.setupColumnListeners();
         } catch (error) {
             console.error('Error updating Kanban:', error);
         }
@@ -103,6 +108,15 @@ class Kanban {
 
         const statusClass = project.getStatusBadgeClass ? project.getStatusBadgeClass(project.status) : 'status-badge';
         
+        const riskBadge = project.riskScore !== undefined && project.riskScore !== null ? `
+            <div class="kanban-card-risk" style="margin-top: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fas fa-brain" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 0.9rem;"></i>
+                <span class="risk-badge risk-${project.riskLevel || 'low'}" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
+                    ${project.riskLevel ? project.riskLevel.toUpperCase() : 'LOW'} Risk
+                </span>
+            </div>
+        ` : '';
+        
         card.innerHTML = `
             <div class="kanban-card-header">
                 <h4>${project.title || 'Untitled'}</h4>
@@ -121,11 +135,17 @@ class Kanban {
                         <i class="fas fa-calendar-check"></i> ${project.formatDate ? project.formatDate(project.targetDate) : project.targetDate}
                     </div>
                 ` : ''}
+                ${project.predictedCompletionDate ? `
+                    <div class="kanban-card-prediction" style="font-size: 0.85rem; color: #718096; margin-top: 0.25rem;">
+                        <i class="fas fa-crystal-ball" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i> AI Predicted: ${project.formatDate ? project.formatDate(project.predictedCompletionDate) : project.predictedCompletionDate}
+                    </div>
+                ` : ''}
                 ${project.projectManager ? `
                     <div class="kanban-card-manager">
                         <i class="fas fa-user-tie"></i> ${project.projectManager}
                     </div>
                 ` : ''}
+                ${riskBadge}
                 ${project.description ? `
                     <div class="kanban-card-description">
                         ${project.description.length > 100 ? project.description.substring(0, 100) + '...' : project.description}
@@ -151,8 +171,55 @@ class Kanban {
             this.handleDragEnd(e);
         });
         card.addEventListener('click', (e) => {
+            // Don't handle card click if clicking on buttons - let button handlers work
+            if (e.target.closest('button')) {
+                return;
+            }
             this.handleCardClick(e);
         });
+        
+        // Add direct click handlers to buttons to ensure they work
+        const editBtn = card.querySelector('.kanban-edit-btn');
+        const viewBtn = card.querySelector('.kanban-view-btn');
+        
+        if (editBtn) {
+            editBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const projectId = parseInt(editBtn.dataset.projectId);
+                const project = Project.all.find(p => {
+                    const pId = typeof p.id === 'string' ? parseInt(p.id) : p.id;
+                    return pId === projectId;
+                });
+                if (project) {
+                    project.openEditModal();
+                }
+            });
+        }
+        
+        if (viewBtn) {
+            viewBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const projectId = parseInt(viewBtn.dataset.projectId);
+                const project = Project.all.find(p => {
+                    const pId = typeof p.id === 'string' ? parseInt(p.id) : p.id;
+                    return pId === projectId;
+                });
+                if (project) {
+                    // Switch to projects view and scroll to project
+                    const projectsTab = document.getElementById('projects-tab');
+                    if (projectsTab) {
+                        projectsTab.click();
+                        setTimeout(() => {
+                            project.element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            project.element.style.animation = 'pulse 1s ease';
+                            setTimeout(() => {
+                                project.element.style.animation = '';
+                            }, 1000);
+                        }, 100);
+                    }
+                }
+            });
+        }
 
         columnBody.appendChild(card);
     }
@@ -169,39 +236,22 @@ class Kanban {
     }
 
     static setupEventListeners() {
-        // Column drop zones
+        // Column drop zones - these need to be re-setup when Kanban is re-rendered
+        // We'll call this from updateKanban or use event delegation
+        this.setupColumnListeners();
+    }
+    
+    static setupColumnListeners() {
+        // Add event listeners to column drop zones
         document.querySelectorAll('.kanban-column-body').forEach(columnBody => {
-            columnBody.addEventListener('dragover', this.handleDragOver.bind(this));
-            columnBody.addEventListener('drop', this.handleDrop.bind(this));
-            columnBody.addEventListener('dragenter', this.handleDragEnter.bind(this));
-            columnBody.addEventListener('dragleave', this.handleDragLeave.bind(this));
-        });
-
-        // Edit and view buttons
-        document.addEventListener('click', (e) => {
-            if (e.target.closest('.kanban-edit-btn')) {
-                const projectId = parseInt(e.target.closest('.kanban-edit-btn').dataset.projectId);
-                const project = Project.all.find(p => p.id === projectId);
-                if (project) {
-                    project.openEditModal();
-                }
-            } else if (e.target.closest('.kanban-view-btn')) {
-                const projectId = parseInt(e.target.closest('.kanban-view-btn').dataset.projectId);
-                const project = Project.all.find(p => p.id === projectId);
-                if (project) {
-                    // Switch to projects view and scroll to project
-                    const projectsTab = document.getElementById('projects-tab');
-                    if (projectsTab) {
-                        projectsTab.click();
-                        setTimeout(() => {
-                            project.element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                            project.element.style.animation = 'pulse 1s ease';
-                            setTimeout(() => {
-                                project.element.style.animation = '';
-                            }, 1000);
-                        }, 100);
-                    }
-                }
+            // Remove any existing listeners by cloning (but preserve children)
+            const hasListeners = columnBody.getAttribute('data-listeners-attached');
+            if (!hasListeners) {
+                columnBody.addEventListener('dragover', this.handleDragOver.bind(this));
+                columnBody.addEventListener('drop', this.handleDrop.bind(this));
+                columnBody.addEventListener('dragenter', this.handleDragEnter.bind(this));
+                columnBody.addEventListener('dragleave', this.handleDragLeave.bind(this));
+                columnBody.setAttribute('data-listeners-attached', 'true');
             }
         });
     }
